@@ -1,0 +1,4 @@
+Starting index build...
+Imported RAGPipeline
+Initialized RAGPipeline
+Finished build_index

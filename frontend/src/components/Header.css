@@ -1,0 +1,175 @@
+/* ===========================
+   Header Styles
+   =========================== */
+
+.hdr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-glass);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.hdr__left {
+  flex-shrink: 0;
+}
+
+.hdr__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hdr__breadcrumb-item {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.hdr__breadcrumb-sep {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.hdr__breadcrumb-item--active {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Search */
+.hdr__center {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.hdr__search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hdr__search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.hdr__search {
+  width: 100%;
+  padding: 8px 36px 8px 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.hdr__search:hover {
+  border-color: var(--border-default);
+}
+
+.hdr__kbd {
+  position: absolute;
+  right: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-surface);
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Right */
+.hdr__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Status Badge */
+.hdr__status-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: default;
+}
+
+.hdr__status-badge--online {
+  background: rgba(16, 229, 153, 0.08);
+  color: var(--success);
+  border-color: rgba(16, 229, 153, 0.2);
+}
+
+.hdr__status-badge--offline {
+  background: rgba(255, 77, 125, 0.08);
+  color: var(--error);
+  border-color: rgba(255, 77, 125, 0.2);
+}
+
+/* Icon Buttons */
+.hdr__icon-btn {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.hdr__icon-btn:hover {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.hdr__notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 1.5px solid var(--bg-surface);
+}
+
+/* Avatar */
+.hdr__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(108, 99, 255, 0.3);
+  flex-shrink: 0;
+}

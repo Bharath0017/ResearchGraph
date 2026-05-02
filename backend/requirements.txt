@@ -1,0 +1,81 @@
+# =========================
+# API Framework
+# =========================
+
+fastapi
+uvicorn[standard]
+python-multipart
+
+# =========================
+# Environment Handling
+# =========================
+
+python-dotenv
+
+# =========================
+# RAG Framework
+# =========================
+
+langchain
+langchain-community
+langchain-core
+
+# =========================
+# Ollama Integration
+# =========================
+
+langchain-ollama
+ollama
+
+# =========================
+# Vector Database
+# =========================
+
+faiss-cpu
+chromadb
+pinecone
+
+# =========================
+# Document Processing
+# =========================
+
+pymupdf
+pandas
+camelot-py
+opencv-python-headless
+
+# =========================
+# Graph RAG
+# =========================
+
+networkx
+
+# =========================
+# Utilities
+# =========================
+
+numpy
+tqdm
+Pillow
+requests
+
+# =========================
+# Multimodal Processing
+# =========================
+
+torch
+torchvision
+torchaudio
+open-clip-torch
+openai-whisper
+
+# =========================
+# Image / Table / NLP
+# =========================
+
+timm
+ftfy
+tiktoken
+regex
+safetensors
+numba
