@@ -161,10 +161,3 @@ npm run dev
 ```
 
 ---
-
-If you'd like, I can:
-- generate a `.env.example` with recommended variables,
-- add npm scripts or a Makefile to standardize these commands,
-- or run these setup steps on your machine now and start both servers.
-
-Please tell me which of the above you want next.
