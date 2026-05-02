@@ -1,8 +1,4 @@
 # 🔬 ResearchGraph
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-05998b.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18+-61dafb.svg)](https://reactjs.org/)
 
 **ResearchGraph** is an enterprise-grade Multi-Modal RAG (Retrieval-Augmented Generation) ecosystem designed for researchers and knowledge workers. It seamlessly integrates unstructured data—PDFs, images, and audio—into a unified, searchable, and graph-enhanced knowledge repository.
 
@@ -135,11 +131,3 @@ npm run dev
 | `/build-index` | `POST` | Trigger background indexing |
 | `/query` | `POST` | Ask a question to the knowledge base |
 | `/graph` | `GET` | Retrieve knowledge graph data |
-
----
-
-## Contributing
-We welcome contributions! Please see our `CONTRIBUTING.md` for guidelines on how to get started.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
