@@ -14,34 +14,51 @@
 ---
 
 ## System Architecture
-ResearchGraph follows a decoupled architecture separating data processing, AI inference, and user interaction.
+ResearchGraph follows a modular architecture where the **RAG Engine** acts as the central coordinator between the vector store, knowledge graph, and local LLM.
 
 ```mermaid
 graph TD
-    subgraph "Frontend (React + Vite)"
+    subgraph "Frontend Layer"
         UI[Interactive Dashboard]
-        GraphVis[Graph Visualization]
+        GV[Graph Visualizer]
     end
 
-    subgraph "Backend (FastAPI)"
-        API[API Gateway]
-        Orch[Pipeline Orchestrator]
-        BGT[Background Tasks]
+    subgraph "Backend Orchestration"
+        API[FastAPI Gateway]
+        RAG[RAG Pipeline Engine]
+        BGT[Background Indexer]
     end
 
-    subgraph "Intelligence Layer"
-        Ollama[Ollama Inference Server]
-        FAISS[(FAISS/Pinecone Vector DB)]
+    subgraph "AI & Intelligence Layer"
+        Ollama[Ollama Local LLM]
+        EMB[Embedding Models]
+        VDB[(Vector DB - FAISS/Pinecone)]
         NX[NetworkX Graph Engine]
     end
 
-    UI --> API
-    API --> BGT
-    BGT --> Orch
-    Orch --> Ollama
-    Orch --> FAISS
-    Orch --> NX
-    GraphVis --> API
+    %% User Interaction
+    UI -->|Query| API
+    API --> RAG
+    
+    %% RAG Pipeline Flow
+    RAG -->|1. Vector Search| EMB
+    EMB --> VDB
+    VDB -->|Context Chunks| RAG
+    
+    RAG -->|2. Graph Lookup| NX
+    NX -->|Relational Data| RAG
+    
+    RAG -->|3. Synthesis| Ollama
+    Ollama -->|Final Answer| RAG
+    RAG --> API
+    API --> UI
+
+    %% Data Processing Flow
+    API -->|Upload| BGT
+    BGT -->|Embed & Index| VDB
+    BGT -->|Extract Entities| NX
+    
+    GV -->|Fetch Network| API
 ```
 
 ---
@@ -129,5 +146,5 @@ npm run dev
 | `/upload` | `POST` | Upload PDF research papers |
 | `/upload-audio`| `POST` | Upload audio notes |
 | `/build-index` | `POST` | Trigger background indexing |
-| `/query` | `POST` | Ask a question to the knowledge base |
+| `/query` | `POST` | Ask a question using the RAG pipeline |
 | `/graph` | `GET` | Retrieve knowledge graph data |
