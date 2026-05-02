@@ -1,16 +1,18 @@
 @echo off
-title ResearchGraph Backend Server
-color 0A
+title ResearchGraph Full Stack
+color 0B
 echo =============================================
-echo   ResearchGraph Backend - Auto-Restart Mode
+echo   ResearchGraph Ecosystem - Launching
 echo =============================================
 echo.
 
-:START
-echo [%time%] Starting server...
-wsl bash -c "cd /mnt/c/Users/HP/Downloads/researchgraph/researchgraph/backend && source venv/bin/activate && pkill -9 -f uvicorn 2>/dev/null; sleep 1 && python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
-echo.
-echo [%time%] Server stopped. Restarting in 3 seconds...
-echo   (Press Ctrl+C to stop)
-timeout /t 3 /nobreak >nul
-goto START
+:: 1. Launch Backend in a new window with Auto-Restart
+echo [*] Starting Backend (WSL/FastAPI) in a separate window...
+start "ResearchGraph Backend" cmd /c "echo Backend Server starting... && :LOOP && wsl bash -c \"cd /mnt/c/Users/HP/Downloads/researchgraph/researchgraph/backend && source venv/bin/activate && python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000\" && echo Backend crashed. Restarting in 3s... && timeout /t 3 && goto LOOP"
+
+:: 2. Launch Frontend in the current window
+echo [*] Starting Frontend (Vite/React)...
+cd frontend
+npm run dev
+
+pause
