@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import ChatPanel from "./components/ChatPanel";
 import MultiModalInput from "./components/MultiModalInput";
 import InsightsPanel from "./components/InsightsPanel";
+import KnowledgeGraph from "./KnowledgeGraph";
 import "./App.css";
 
 const API_URL = "http://127.0.0.1:8000";
@@ -280,11 +281,8 @@ export default function App() {
 
           {/* ── GRAPH TAB ── */}
           {activeTab === "graph" && (
-            <div className="app__placeholder animate-fade-in">
-              <div className="app__placeholder-icon">🕸️</div>
-              <h2>Knowledge Graph</h2>
-              <p>Visualize entity relationships extracted from your papers.</p>
-              <span className="app__beta-badge">Coming Soon</span>
+            <div className="animate-fade-in" style={{ flex: 1, overflow: "hidden", padding: "0 8px" }}>
+              <KnowledgeGraph />
             </div>
           )}
 

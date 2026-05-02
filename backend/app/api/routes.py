@@ -146,7 +146,22 @@ def build_index():
 
 @router.post("/query")
 def query_rag(request: QueryRequest):
-    answer = pipeline.query(request.query)
+    import concurrent.futures
+    def _run():
+        return pipeline.query(request.query)
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor() as ex:
+            future = ex.submit(_run)
+            answer = future.result(timeout=25)
+    except concurrent.futures.TimeoutError:
+        answer = (
+            "The query timed out. This usually means Ollama is not running. "
+            "Please start Ollama with: `ollama serve` and ensure the model is pulled: `ollama pull llama3`"
+        )
+    except Exception as e:
+        answer = f"Query error: {str(e)}"
+
     return {
         "query": request.query,
         "answer": answer,

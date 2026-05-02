@@ -1,18 +1,9 @@
 import os
 
-# =========================
-# Graph Imports
-# =========================
-
 from app.graph.entities import EntityExtractor
 from app.graph.relationships import RelationshipExtractor
 from app.graph.builder import GraphBuilder
 from app.database.graph_store import GraphStore
-
-# =========================
-# Core Modules
-# =========================
-
 from app.document.loader import DocumentLoader
 from app.document.chunker import DocumentChunker
 from app.rag.embeddings import EmbeddingModel
@@ -23,412 +14,254 @@ from app.document.parser import DocumentParser
 from app.multimodal.image_processor import ImageProcessor
 from app.document.table_parser import TableParser
 from app.multimodal.clip_embeddings import CLIPEmbedding
-
-# =========================
-# Audio Modules
-# =========================
-
 from app.multimodal.audio_processor import AudioProcessor
 from app.multimodal.audio_embeddings import AudioEmbedding
 
 
 class RAGPipeline:
-
     """
-    Full Multimodal Graph RAG Pipeline
+    Full Multimodal Graph RAG Pipeline.
+    All heavy components are initialized lazily on first use
+    to prevent server crashes at startup.
     """
 
     def __init__(self):
+        print("RAGPipeline ready (lazy mode)")
+        # Lightweight components only — no heavy models loaded here
+        self._loader = None
+        self._chunker = None
+        self._embedder = None
+        self._vector_store = None
+        self._retriever = None
+        self._llm = None
+        self._parser = None
+        self._image_processor = None
+        self._table_parser = None
+        self._clip_embedder = None
+        self._audio_processor = None
+        self._audio_embedder = None
+        self._entity_extractor = None
+        self._relationship_extractor = None
+        self._graph_builder = None
+        self._graph_store = None
 
-        print(" Initializing RAG Pipeline...")
+    # ── Lazy accessors ──────────────────────────────────────────────
 
-        # Core components
+    @property
+    def loader(self):
+        if self._loader is None:
+            self._loader = DocumentLoader()
+        return self._loader
 
-        self.loader = DocumentLoader()
+    @property
+    def chunker(self):
+        if self._chunker is None:
+            self._chunker = DocumentChunker()
+        return self._chunker
 
-        self.chunker = DocumentChunker()
+    @property
+    def embedder(self):
+        if self._embedder is None:
+            self._embedder = EmbeddingModel()
+        return self._embedder
 
-        self.embedder = EmbeddingModel()
+    @property
+    def vector_store(self):
+        if self._vector_store is None:
+            self._vector_store = PineconeStore()
+        return self._vector_store
 
-        self.vector_store = PineconeStore()
+    @property
+    def retriever(self):
+        if self._retriever is None:
+            self._retriever = Retriever()
+        return self._retriever
 
-        self.retriever = Retriever()
+    @property
+    def llm(self):
+        if self._llm is None:
+            self._llm = LLMModel()
+        return self._llm
 
-        self.llm = LLMModel()
+    @property
+    def parser(self):
+        if self._parser is None:
+            self._parser = DocumentParser()
+        return self._parser
 
-        self.parser = DocumentParser()
+    @property
+    def image_processor(self):
+        if self._image_processor is None:
+            self._image_processor = ImageProcessor()
+        return self._image_processor
 
-        self.image_processor = ImageProcessor()
+    @property
+    def table_parser(self):
+        if self._table_parser is None:
+            self._table_parser = TableParser()
+        return self._table_parser
 
-        self.table_parser = TableParser()
+    @property
+    def clip_embedder(self):
+        if self._clip_embedder is None:
+            self._clip_embedder = CLIPEmbedding()
+        return self._clip_embedder
 
-        self.clip_embedder = CLIPEmbedding()
+    @property
+    def audio_processor(self):
+        if self._audio_processor is None:
+            self._audio_processor = AudioProcessor()
+        return self._audio_processor
 
-        # Audio modules
+    @property
+    def audio_embedder(self):
+        if self._audio_embedder is None:
+            self._audio_embedder = AudioEmbedding()
+        return self._audio_embedder
 
-        self.audio_processor = AudioProcessor()
+    @property
+    def entity_extractor(self):
+        if self._entity_extractor is None:
+            self._entity_extractor = EntityExtractor()
+        return self._entity_extractor
 
-        self.audio_embedder = AudioEmbedding()
+    @property
+    def relationship_extractor(self):
+        if self._relationship_extractor is None:
+            self._relationship_extractor = RelationshipExtractor()
+        return self._relationship_extractor
 
-        # Graph components
+    @property
+    def graph_builder(self):
+        if self._graph_builder is None:
+            self._graph_builder = GraphBuilder()
+        return self._graph_builder
 
-        self.entity_extractor = EntityExtractor()
+    @property
+    def graph_store(self):
+        if self._graph_store is None:
+            self._graph_store = GraphStore()
+        return self._graph_store
 
-        self.relationship_extractor = (
-            RelationshipExtractor()
-        )
-
-        self.graph_builder = GraphBuilder()
-
-        self.graph_store = GraphStore()
-
-        print(" Pipeline initialized successfully")
-
-
+    # ── Build Index ──────────────────────────────────────────────────
 
     def build_index(self):
-
-        """
-        Build multimodal index
-        + build knowledge graph
-        """
-
-        print("\n Starting multimodal index build...")
-
-
-        # STEP 1  LOAD DOCUMENTS
-
-        print("\n Loading documents...")
-
-        documents = (
-            self.loader.load_all_documents()
-        )
-
-        print(
-            f" Loaded {len(documents)} documents"
-        )
-
-
-        # STEP 2  CHUNK TEXT
-
-        print("\n Chunking text...")
-
-        all_chunks = (
-            self.chunker.chunk_documents(
-                documents
-            )
-        )
-
-        print(
-            f" Created {len(all_chunks)} text chunks"
-        )
-
-
-        # STEP 3  IMAGE PROCESSING
-
-        print("\n Processing images...")
-
-        image_explanations = (
-            self.image_processor
-            .explain_all_images()
-        )
-
-        print(
-            f" Processed {len(image_explanations)} images"
-        )
-
-
-        # STEP 4  AUDIO PROCESSING
-
-        print("\n Processing audio files...")
-
-        extracted_audio = (
-            self.audio_processor
-            .process_audio_files()
-        )
-
-        audio_chunks = []
-
-        for audio in extracted_audio:
-
-            audio_chunks.append({
-
-                "content":
-                f"Audio content from {audio['source']}",
-
-                "metadata": {
-                    "source": audio["source"],
-                    "type": "audio"
-                }
-
-            })
-
-        print(
-            f" Processed {len(audio_chunks)} audio files"
-        )
-
-
-        # STEP 5  TEXT EMBEDDINGS
-
-        print("\n Generating text embeddings...")
-
-        text_embeddings = (
-            self.embedder.embed_documents(
-                all_chunks
-            )
-        )
-
-        print(
-            f" Generated {len(text_embeddings)} text embeddings"
-        )
-
-
-        # STEP 6  IMAGE EMBEDDINGS
-
-        print("\n Generating CLIP embeddings...")
-
-        clip_data = (
-            self.clip_embedder
-            .embed_all_images()
-        )
-
-        clip_chunks = []
-
-        clip_vectors = []
-
-        for item in clip_data:
-
-            clip_chunks.append({
-
-                "content":
-                f"Image content from {item['source']}",
-
-                "metadata": {
-                    "source": item["source"],
-                    "type": "image"
-                }
-
-            })
-
-            clip_vectors.append(
-                item["embedding"]
-            )
-
-        print(
-            f" Added {len(clip_chunks)} CLIP embeddings"
-        )
-
-
-        # STEP 7  AUDIO EMBEDDINGS
-
-        print("\n Generating audio embeddings...")
-
-        audio_vectors = []
-
-        for audio in extracted_audio:
-
-            emb = (
-                self.audio_embedder
-                .embed_audio(
-                    audio["path"]
-                )
-            )
-
-            audio_vectors.append(emb)
-
-        print(
-            f" Generated {len(audio_vectors)} audio embeddings"
-        )
-
-
-        # STEP 8  COMBINE ALL
-
-        print("\n Combining embeddings...")
-
-        combined_embeddings = []
-
-        combined_chunks = []
-
-        combined_embeddings.extend(
-            text_embeddings
-        )
-
-        combined_chunks.extend(
-            all_chunks
-        )
-
-        combined_embeddings.extend(
-            clip_vectors
-        )
-
-        combined_chunks.extend(
-            clip_chunks
-        )
-
-        combined_embeddings.extend(
-            audio_vectors
-        )
-
-        combined_chunks.extend(
-            audio_chunks
-        )
-
-        print(
-            f" Total vectors: {len(combined_embeddings)}"
-        )
-
-
-        # STEP 9  STORE IN PINECONE
-
-        print("\n Uploading to Pinecone...")
-
-        self.vector_store.upsert_embeddings(
-            combined_embeddings,
-            combined_chunks
-        )
-
-        print(" Pinecone upload complete")
-
-
-        # STEP 10  GRAPH BUILDING
-
-        print("\n Building Knowledge Graph...")
-
-        entities = (
-            self.entity_extractor
-            .extract_from_chunks(
-                combined_chunks
-            )
-        )
-
-        print(
-            f" Extracted {len(entities)} entities"
-        )
-
-        relationships = (
-            self.relationship_extractor
-            .create_relationships(
-                entities
-            )
-        )
-
-        print(
-            f" Created {len(relationships)} relationships"
-        )
-
-        self.graph_builder.add_entities(
-            entities
-        )
-
-        self.graph_builder.add_relationships(
-            relationships
-        )
-
-        graph = (
-            self.graph_builder.get_graph()
-        )
-
-        self.graph_store.save_graph(
-            graph
-        )
-
-        print(
-            " Knowledge graph saved successfully"
-        )
-
-        print("\n FULL INDEX BUILD COMPLETE")
-
-
+        """Build multimodal index + knowledge graph."""
+
+        print("Starting multimodal index build...")
+
+        # STEP 1 - Load documents
+        print("Loading documents...")
+        documents = self.loader.load_all_documents()
+        print(f"Loaded {len(documents)} documents")
+
+        # STEP 2 - Chunk text
+        print("Chunking text...")
+        all_chunks = self.chunker.chunk_documents(documents)
+        print(f"Created {len(all_chunks)} text chunks")
+
+        # STEP 3 - Image processing
+        print("Processing images...")
+        image_explanations = self.image_processor.explain_all_images()
+        print(f"Processed {len(image_explanations)} images")
+
+        # STEP 4 - Audio processing
+        print("Processing audio files...")
+        extracted_audio = self.audio_processor.process_audio_files()
+        audio_chunks = [
+            {
+                "content": f"Audio content from {a['source']}",
+                "metadata": {"source": a["source"], "type": "audio"}
+            }
+            for a in extracted_audio
+        ]
+        print(f"Processed {len(audio_chunks)} audio files")
+
+        # STEP 5 - Text embeddings
+        print("Generating text embeddings...")
+        text_embeddings = self.embedder.embed_documents(all_chunks)
+        print(f"Generated {len(text_embeddings)} text embeddings")
+
+        # STEP 6 - CLIP image embeddings
+        print("Generating CLIP embeddings...")
+        clip_data = self.clip_embedder.embed_all_images()
+        clip_chunks = [
+            {"content": f"Image content from {i['source']}",
+             "metadata": {"source": i["source"], "type": "image"}}
+            for i in clip_data
+        ]
+        clip_vectors = [i["embedding"] for i in clip_data]
+        print(f"Added {len(clip_chunks)} CLIP embeddings")
+
+        # STEP 7 - Audio embeddings
+        print("Generating audio embeddings...")
+        audio_vectors = [
+            self.audio_embedder.embed_audio(a["path"])
+            for a in extracted_audio
+        ]
+        print(f"Generated {len(audio_vectors)} audio embeddings")
+
+        # STEP 8 - Combine all
+        combined_embeddings = text_embeddings + clip_vectors + audio_vectors
+        combined_chunks = all_chunks + clip_chunks + audio_chunks
+        print(f"Total vectors: {len(combined_embeddings)}")
+
+        # STEP 9 - Store in Pinecone
+        print("Uploading to Pinecone...")
+        self.vector_store.upsert_embeddings(combined_embeddings, combined_chunks)
+        print("Pinecone upload complete")
+
+        # STEP 10 - Build Knowledge Graph
+        print("Building Knowledge Graph...")
+        entities = self.entity_extractor.extract_from_chunks(combined_chunks)
+        print(f"Extracted {len(entities)} entities")
+
+        relationships = self.relationship_extractor.create_relationships(entities)
+        print(f"Created {len(relationships)} relationships")
+
+        self.graph_builder.add_entities(entities)
+        self.graph_builder.add_relationships(relationships)
+        graph = self.graph_builder.get_graph()
+        self.graph_store.save_graph(graph)
+        print("Knowledge graph saved successfully")
+
+        print("FULL INDEX BUILD COMPLETE")
+
+    # ── Query ────────────────────────────────────────────────────────
 
     def query(self, user_query):
+        """Graph-aware Query Pipeline."""
 
-        """
-        Graph-aware Query Pipeline
-        """
+        print("Running Graph-aware Query...")
 
-        print("\n Running Graph-aware Query...")
-
-
-        # STEP 1  Load Graph
-
+        # STEP 1 - Load Graph
         graph = self.graph_store.load_graph()
-
         graph_context = ""
 
         if graph is not None:
-
-            print(" Graph loaded")
-
-            query_entities = (
-                self.entity_extractor
-                .extract_entities(user_query)
-            )
-
-            print(
-                f" Query entities: {query_entities}"
-            )
+            print("Graph loaded")
+            query_entities = self.entity_extractor.extract_entities(user_query)
+            print(f"Query entities: {query_entities}")
 
             related_nodes = set()
-
             for entity in query_entities:
-
                 if entity in graph:
-
-                    neighbors = graph.neighbors(
-                        entity
-                    )
-
-                    for n in neighbors:
-
+                    for n in graph.neighbors(entity):
                         related_nodes.add(n)
 
             if related_nodes:
+                graph_context = "Related concepts: " + ", ".join(list(related_nodes)[:20])
+                print(f"Graph context added: {graph_context}")
 
-                graph_context = (
-                    "Related concepts: "
-                    + ", ".join(
-                        list(related_nodes)[:20]
-                    )
-                )
+        # STEP 2 - Retrieve
+        retrieved_chunks = self.retriever.retrieve(user_query)
 
-                print(
-                    f" Graph context added: {graph_context}"
-                )
-
-
-        # STEP 2  Retrieve
-
-        retrieved_chunks = (
-            self.retriever.retrieve(
-                user_query
-            )
-        )
-
-
-        # STEP 3  Combine Context
-
+        # STEP 3 - Combine context
         final_context = []
-
         if graph_context:
+            final_context.append({"content": graph_context})
+        final_context.extend(retrieved_chunks)
 
-            final_context.append({
-
-                "content": graph_context
-
-            })
-
-        final_context.extend(
-            retrieved_chunks
-        )
-
-
-        # STEP 4  Generate Answer
-
-        answer = (
-            self.llm.generate_answer(
-                user_query,
-                final_context
-            )
-        )
-
+        # STEP 4 - Generate answer
+        answer = self.llm.generate_answer(user_query, final_context)
         return answer
